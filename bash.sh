@@ -2,9 +2,8 @@
 
 #===============================================================================================
 #   脚本: Ubuntu 初始化一键脚本
-#   描述: 用于快速完成新安装Ubuntu系统后的软件安装与环境配置。
 #   作者: bai0012
-#   更新日期: 2025-08-02
+#   更新日期: 2025-08-04
 #===============================================================================================
 
 # 颜色定义
@@ -15,192 +14,276 @@ NC='\033[0m' # No Color
 
 # 检查是否以root用户运行
 if [ "$(id -u)" -ne 0 ]; then
-    echo -e "${RED}错误：此脚本需要以root权限运行。${NC}"
-    echo -e "${YELLOW}请尝试使用 'sudo bash ${0}' 来运行此脚本。${NC}"
+    echo -e "${RED}Error: This script must be run as root. Please use 'sudo bash'.${NC}"
+    echo -e "${RED}错误：此脚本需要以root权限运行。请使用 'sudo bash'。${NC}"
     exit 1
 fi
 
+# 语言选择
+select_language() {
+    echo -e "${YELLOW}Please select a language / 请选择语言:${NC}"
+    echo -e "${GREEN}1. English${NC}"
+    echo -e "${GREEN}2. 中文 (Chinese)${NC}"
+    read -rp "Enter your choice [1-2]: " lang_choice
+
+    case $lang_choice in
+        1)
+            LANG="en"
+            ;;
+        2)
+            LANG="zh"
+            ;;
+        *)
+            echo -e "${RED}Invalid input, defaulting to English.${NC}"
+            LANG="en"
+            ;;
+    esac
+}
+
+# 调用语言选择函数
+select_language
+
+# 定义文本变量
+# --- English ---
+if [ "$LANG" = "en" ]; then
+    PAUSE_MSG="Task completed. Press [Enter] to return to the main menu..."
+    # Menu Titles
+    MENU_TITLE="Ubuntu Quick Setup Script (v4.0)"
+    MENU_SECTION_SYSTEM="--------- System & SSH ---------"
+    MENU_SECTION_PANEL="-------- Panel & Proxy ---------"
+    MENU_SECTION_NETWORK="------- Network & Security -------"
+    MENU_SECTION_OTHERS="------- Other Scripts (Use with caution) -------"
+    # Menu Options
+    MENU_OPT_1="Change APT mirror to a Chinese source"
+    MENU_OPT_2="Update and clean system"
+    MENU_OPT_3="Install common tools"
+    MENU_OPT_4="Install Docker and Docker-Compose"
+    MENU_OPT_5="Install XRDP (Remote Desktop)"
+    MENU_OPT_6="Install SSH server & configure public key (github.com/bai0012)"
+    MENU_TIPS_6="Installing SSH Server..."
+    MENU_TIPS_6_2="Configuring SSH public key..."
+    MENU_TIPS_6_3="SSH public key has been installed to"
+    MENU_OPT_7="Change SSH port to 8847 (Sync with Fail2ban)"
+    MENU_TIPS_7="Changing SSH port to"
+    MENU_TIPS_7_2="SSH port has been changed. Restarting SSH service..."
+    MENU_TIPS_7_3="Fail2ban detected, syncing port..."
+    MENU_TIPS_7_4="Fail2ban port has been changed. Restarting Fail2ban service..."
+    MENU_OPT_8="Change timezone to Asia/Shanghai"
+    MENU_TIPS_8="Changing timezone to Asia/Shanghai..."
+    MENU_TIPS_8_2="Timezone updated. Current time:"
+    MENU_OPT_9="Install 1Panel"
+    MENU_OPT_10="Install X-ui"
+    MENU_OPT_11="Install V2rayA"
+    MENU_OPT_12="Install ZeroTier"
+    MENU_TIPS_12="Please enter the ZeroTier Network ID to join"
+    MENU_TIPS_12_2="Default"
+    MENU_OPT_13="Install Fail2ban"
+    MENU_OPT_14="Install Chinese language support"
+    MENU_OPT_15="Install AdGuard Home"
+    MENU_OPT_16="Configure AdGuard Home to use port 53"
+    MENU_OPT_17="kernel.sh"
+    MENU_OPT_18="oneclick.sh"
+    MENU_OPT_0="Exit Script"
+    # General Messages
+    INVALID_INPUT="Invalid input, please enter a number between"
+fi
+
+# --- 中文 ---
+if [ "$LANG" = "zh" ]; then
+    PAUSE_MSG="任务完成。请按 [Enter] 键返回主菜单..."
+    # Menu Titles
+    MENU_TITLE="Ubuntu 初始化一键脚本 (v4.0)"
+    MENU_SECTION_SYSTEM="-------------------------- 系统与SSH -------------------------"
+    MENU_SECTION_PANEL="------------------------- 面板与代理 -------------------------"
+    MENU_SECTION_NETWORK="------------------------- 网络与安全 -------------------------"
+    MENU_SECTION_OTHERS="---------------------- 其他一键脚本(谨慎) --------------------"
+    # Menu Options
+    MENU_OPT_1="一键更换系统软件源"
+    MENU_OPT_2="系统更新与清理"
+    MENU_OPT_3="安装常用工具"
+    MENU_OPT_4="安装 Docker 和 Docker-Compose"
+    MENU_OPT_5="安装 XRDP (远程桌面)"
+    MENU_OPT_6="安装SSH服务并配置公钥 (github.com/bai0012)"
+    MENU_TIPS_6="正在安装 OpenSSH 服务器..."
+    MENU_TIPS_6_2="正在配置SSH公钥..."
+    MENU_TIPS_6_3="SSH公钥已安装到"
+    MENU_OPT_7="修改SSH端口为 8847 (联动Fail2ban)"
+    MENU_TIPS_7="正在修改SSH端口为"
+    MENU_TIPS_7_2="SSH端口已修改。正在重启SSH服务..."
+    MENU_TIPS_7_3="检测到Fail2ban，正在同步修改监听端口..."
+    MENU_TIPS_7_4="Fail2ban端口已修改。正在重启Fail2ban服务..."
+    MENU_OPT_8="修改时区为 Asia/Shanghai"
+    MENU_TIPS_8="正在修改时区为 Asia/Shanghai..."
+    MENU_TIPS_8_2="时区已更新。当前时间:"
+    MENU_OPT_9="安装 1Panel"
+    MENU_OPT_10="安装 X-ui"
+    MENU_OPT_11="安装 V2rayA"
+    MENU_OPT_12="安装 ZeroTier"
+    MENU_TIPS_12="请输入您要加入的 ZeroTier 网络 ID"
+    MENU_TIPS_12_2="默认"
+    MENU_OPT_13="安装 Fail2ban"
+    MENU_OPT_14="安装中文语言支持"
+    MENU_OPT_15="安装 AdGuard Home"
+    MENU_OPT_16="配置 AdGuard Home 使用53端口"
+    MENU_OPT_17="kernel.sh"
+    MENU_OPT_18="oneclick.sh"
+    MENU_OPT_0="退出脚本"
+    # General Messages
+    INVALID_INPUT="无效的输入，请输入 0 到 18 之间的数字。"
+fi
+
+
 # 暂停并等待用户按回车继续
 function pause() {
-    read -rp "任务完成。请按 [Enter] 键返回主菜单..."
+    read -rp "${PAUSE_MSG}"
 }
 
-# 1. 一键换源
+# 功能函数区
 function change_apt_source() {
-    echo -e "\n${GREEN}==> [1] 开始执行：一键更换系统软件源...${NC}"
-    echo -e "${YELLOW}将使用 'linuxmirrors.cn' 的脚本进行操作。${NC}"
     bash <(curl -sSL https://linuxmirrors.cn/main.sh)
-    echo -e "\n${GREEN}==> 换源脚本执行完毕。建议立即执行一次系统更新。${NC}"
     pause
 }
 
-# 2. 系统更新与清理
 function update_system() {
-    echo -e "\n${GREEN}==> [2] 开始执行：全面更新系统并清理...${NC}"
     apt-get update && apt-get upgrade -y && apt-get autoremove -y && apt-get autoclean -y
-    echo -e "\n${GREEN}==> 系统更新与清理完成。${NC}"
     pause
 }
 
-# 3. 安装常用工具
 function install_common_tools() {
-    echo -e "\n${GREEN}==> [3] 开始执行：安装常用工具 (curl, neofetch, unzip, git...)${NC}"
-    apt-get update && apt-get upgrade -y
-    apt-get install curl neofetch unzip git nano net-tools tasksel screen nethogs -y
-    apt-get autoremove -y
-    echo -e "\n${GREEN}==> 常用工具安装完成。${NC}"
+    apt-get update && apt-get install curl neofetch unzip git nano net-tools tasksel screen nethogs -y
     pause
 }
 
-# 4. 安装 Docker
 function install_docker() {
-    echo -e "\n${GREEN}==> [4] 开始执行：安装 Docker Engine 和 Docker Compose...${NC}"
-    # 卸载旧版本
-    for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do apt-get remove $pkg; done
-
-    echo -e "${YELLOW}正在安装依赖并设置 Docker GPG 密钥...${NC}"
-    apt-get update
-    apt-get install ca-certificates curl -y
+    apt-get update && apt-get install ca-certificates curl -y
     install -m 0755 -d /etc/apt/keyrings
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
     chmod a+r /etc/apt/keyrings/docker.asc
-
-    echo -e "${YELLOW}正在将 Docker 软件源添加到 Apt sources...${NC}"
-    echo \
-      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-      $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
-      tee /etc/apt/sources.list.d/docker.list > /dev/null
-    
-    echo -e "${YELLOW}正在更新软件包列表并安装 Docker...${NC}"
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
     apt-get update
     apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
-    
-    echo -e "\n${GREEN}==> Docker 安装完成。正在检查运行状态...${NC}"
     systemctl status docker --no-pager
-    docker --version
     pause
 }
 
-# 5. 安装 XRDP
 function install_xrdp() {
-    echo -e "\n${GREEN}==> [5] 开始执行：安装 XRDP 远程桌面服务...${NC}"
-    apt-get update
-    apt-get install xrdp -y
-    # Ubuntu 22.04及以上版本，xrdp用户需要加入 'ssl-cert' 组
+    apt-get update && apt-get install xrdp -y
     adduser xrdp ssl-cert
     systemctl restart xrdp
-    echo -e "\n${GREEN}==> XRDP 安装并启动成功。${NC}"
     systemctl status xrdp --no-pager
     pause
 }
 
-# 6. 安装 1Panel
+function setup_ssh_key() {
+    if ! dpkg -l | grep -q "openssh-server"; then
+        echo -e "${YELLOW}${MENU_TIPS_6}${NC}"
+        apt-get update && apt-get install openssh-server -y
+    fi
+    local ssh_dir="/root/.ssh"
+    local auth_keys_file="${ssh_dir}/authorized_keys"
+    echo -e "${YELLOW}${MENU_TIPS_6_2}${NC}"
+    mkdir -p "${ssh_dir}" && chmod 700 "${ssh_dir}"
+    touch "${auth_keys_file}" && chmod 600 "${auth_keys_file}"
+    curl -sSL http://github.com/bai0012.keys >> "${auth_keys_file}"
+    sort -u "${auth_keys_file}" -o "${auth_keys_file}"
+    echo -e "${GREEN}${MENU_TIPS_6_3} ${auth_keys_file}${NC}"
+    pause
+}
+
+function change_ssh_port() {
+    local new_port=8847
+    local ssh_config="/etc/ssh/sshd_config"
+    echo -e "${YELLOW}${MENU_TIPS_7} ${new_port}...${NC}"
+    cp "${ssh_config}" "${ssh_config}.bak"
+    sed -i "s/^#*Port [0-9]*/Port ${new_port}/" "${ssh_config}"
+    echo -e "${GREEN}${MENU_TIPS_7_2}${NC}"
+    systemctl restart sshd
+    local jail_local="/etc/fail2ban/jail.local"
+    if [ -f "${jail_local}" ]; then
+        echo -e "${YELLOW}${MENU_TIPS_7_3}${NC}"
+        if grep -q "\[sshd\]" "${jail_local}"; then
+            sed -i "/\[sshd\]/,/\[/ s/^port\s*=.*/port = ${new_port}/" "${jail_local}"
+        else
+            echo -e "\n[sshd]\nenabled = true\nport = ${new_port}" >> "${jail_local}"
+        fi
+        echo -e "${GREEN}${MENU_TIPS_7_4}${NC}"
+        systemctl restart fail2ban
+    fi
+    pause
+}
+
+function set_timezone_shanghai() {
+    echo -e "${YELLOW}${MENU_TIPS_8}${NC}"
+    timedatectl set-timezone Asia/Shanghai
+    echo -e "${GREEN}${MENU_TIPS_8_2} $(date)${NC}"
+    pause
+}
+
 function install_1panel() {
-    echo -e "\n${GREEN}==> [6] 开始执行：安装 1Panel...${NC}"
     curl -sSL https://resource.fit2cloud.com/1panel/package/quick_start.sh -o quick_start.sh && bash quick_start.sh
-    echo -e "\n${GREEN}==> 1Panel 安装脚本执行完毕。${NC}"
     pause
 }
 
-# 7. 安装 X-ui
 function install_xui() {
-    echo -e "\n${GREEN}==> [7] 开始执行：安装 X-ui...${NC}"
-    bash <(curl -Ls https://raw.githubusercontent.com/MHSanaei/3x-ui/refs/tags/v2.6.0/install.sh)
-    echo -e "\n${GREEN}==> X-ui 安装脚本执行完毕。${NC}"
+    bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
     pause
 }
 
-# 8. 安装 V2rayA
 function install_v2raya() {
-    echo -e "\n${GREEN}==> [8] 开始执行：安装 V2rayA...${NC}"
     wget -qO - https://apt.v2raya.org/key/public-key.asc | tee /etc/apt/keyrings/v2raya.asc
     echo "deb [signed-by=/etc/apt/keyrings/v2raya.asc] https://apt.v2raya.org/ v2raya main" | tee /etc/apt/sources.list.d/v2raya.list
     apt-get update && apt-get install v2raya xray -y
     systemctl start v2raya.service && systemctl enable v2raya.service
-    echo -e "\n${GREEN}==> V2rayA 安装并启动成功。${NC}"
-    systemctl status v2raya.service --no-pager
     pause
 }
 
-# 9. 安装并加入 ZeroTier
 function install_zerotier() {
-    echo -e "\n${GREEN}==> [9] 开始执行：安装 ZeroTier...${NC}"
     curl -s https://install.zerotier.com | bash
-    echo -e "\n${GREEN}==> ZeroTier 安装完成。${NC}"
-    read -rp "请输入您要加入的 ZeroTier 网络 ID [默认: 5756c68f8fb92cfd]: " network_id
+    read -rp "${MENU_TIPS_12} [${MENU_TIPS_12_2}: 5756c68f8fb92cfd]: " network_id
     network_id=${network_id:-"5756c68f8fb92cfd"}
     zerotier-cli join "${network_id}"
-    echo -e "\n${GREEN}==> ZeroTier 配置完成。${NC}"
     pause
 }
 
-# 10. 安装 Fail2ban
 function install_fail2ban() {
-    echo -e "\n${GREEN}==> [10] 开始执行：安装 Fail2ban...${NC}"
     apt-get update && apt-get install fail2ban -y
-    systemctl restart fail2ban.service
-    echo -e "\n${GREEN}==> Fail2ban 安装并启动成功。${NC}"
-    systemctl status fail2ban.service --no-pager
+    if [ ! -f /etc/fail2ban/jail.local ]; then
+        cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
+    fi
+    systemctl restart fail2ban
     pause
 }
 
-# 11. 安装中文语言支持
 function install_chinese_support() {
-    echo -e "\n${GREEN}==> [11] 开始执行：安装中文语言包和字体...${NC}"
     apt-get install locales -y
-    echo -e "\n${YELLOW}接下来会进入图形化配置界面，请进行如下操作：${NC}"
-    echo -e "1. 使用方向键找到并选中 ${GREEN}en_US.UTF-8 UTF-8${NC} 和 ${GREEN}zh_CN.UTF-8 UTF-8${NC} (按空格键选中)"
-    echo -e "2. 按 Tab 键切换到 <Ok>，然后按 Enter 确认。"
-    echo -e "3. 在下一个界面中，选择 ${GREEN}zh_CN.UTF-8${NC} 作为默认语言环境，然后按 Enter 确认。"
-    read -rp "理解后请按 [Enter] 键开始配置..."
     dpkg-reconfigure locales
-    echo -e "\n${YELLOW}正在安装中文字体...${NC}"
     apt-get install ttf-wqy-microhei ttf-wqy-zenhei xfonts-intl-chinese -y
-    echo -e "\n${GREEN}==> 中文语言支持安装完成。建议重启系统以使所有设置生效。${NC}"
     pause
 }
 
-# 12. 安装 AdGuard Home
 function install_adguard_home() {
-    echo -e "\n${GREEN}==> [12] 开始执行：安装 AdGuard Home...${NC}"
     curl -s -S -L https://raw.githubusercontent.com/AdguardTeam/AdGuardHome/master/scripts/install.sh | sh -s -- -v
-    echo -e "\n${GREEN}==> AdGuard Home 安装脚本执行完毕。${NC}"
     pause
 }
 
-# 13. 配置 AdGuard Home 使用53端口
 function configure_adguard_port53() {
-    echo -e "\n${GREEN}==> [13] 开始执行：配置 systemd-resolved 以释放53端口...${NC}"
     CONF_FILE="/etc/systemd/resolved.conf.d/adguardhome.conf"
     mkdir -p "$(dirname "${CONF_FILE}")"
-    cat <<EOF > "${CONF_FILE}"
-[Resolve]
-DNS=127.0.0.1
-DNSStubListener=no
-EOF
-    if [ -L /etc/resolv.conf ] && [ "$(readlink -f /etc/resolv.conf)" = "/run/systemd/resolve/stub-resolv.conf" ]; then
-        mv /etc/resolv.conf /etc/resolv.conf.backup
+    echo -e "[Resolve]\nDNS=127.0.0.1\nDNSStubListener=no" > "${CONF_FILE}"
+    if [ -L /etc/resolv.conf ]; then
         ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
     fi
     systemctl reload-or-restart systemd-resolved
-    echo -e "\n${GREEN}==> 端口53配置完成！现在 AdGuard Home 应该可以使用53端口了。${NC}"
     pause
 }
 
-# 14. BBR/锐速等内核优化脚本
 function bbr_kernel_script() {
-    echo -e "\n${GREEN}==> [14] 开始执行：BBR/锐速等内核优化脚本...${NC}"
-    echo -e "${YELLOW}该脚本会更改系统内核，请谨慎操作！${NC}"
     bash <(curl -Lso- https://git.io/kernel.sh)
-    echo -e "\n${GREEN}==> 内核优化脚本执行完毕。${NC}"
     pause
 }
 
-# 15. 另一个一键脚本
 function oneclick_script() {
-    echo -e "\n${GREEN}==> [15] 开始执行：另一个一键脚本 (oneclick)...${NC}"
     bash <(curl -Lso- https://git.io/oneclick)
-    echo -e "\n${GREEN}==> oneclick 脚本执行完毕。${NC}"
     pause
 }
 
@@ -209,31 +292,35 @@ function main_menu() {
     while true; do
         clear
         echo -e "${YELLOW}================================================================${NC}"
-        echo -e "${GREEN}             Ubuntu 初始化一键脚本 (v2.0)              ${NC}"
+        echo -e "${GREEN}                  ${MENU_TITLE}                  ${NC}"
         echo -e "${YELLOW}================================================================${NC}"
-        echo -e " ${GREEN}1.${NC}  一键更换系统软件源 (推荐优先执行)"
-        echo -e " ${GREEN}2.${NC}  系统更新与清理 (apt update && upgrade)"
-        echo -e " ${GREEN}3.${NC}  安装常用工具 (curl, neofetch, git, etc.)"
-        echo -e " ${GREEN}4.${NC}  安装 Docker 和 Docker-Compose"
-        echo -e " ${GREEN}5.${NC}  安装 XRDP (远程桌面)"
-        echo -e "${YELLOW}------------------------- 面板与代理 -------------------------${NC}"
-        echo -e " ${GREEN}6.${NC}  安装 1Panel (服务器运维管理面板)"
-        echo -e " ${GREEN}7.${NC}  安装 X-ui (v2.6.0) (多功能代理面板)"
-        echo -e " ${GREEN}8.${NC}  安装 V2rayA (V2Ray 客户端)"
-        echo -e "${YELLOW}------------------------- 系统与网络 -------------------------${NC}"
-        echo -e " ${GREEN}9.${NC}  安装 ZeroTier (虚拟局域网)"
-        echo -e " ${GREEN}10.${NC} 安装 Fail2ban (防暴力破解)"
-        echo -e " ${GREEN}11.${NC} 安装中文语言支持及字体"
-        echo -e " ${GREEN}12.${NC} 安装 AdGuard Home (广告拦截)"
-        echo -e " ${GREEN}13.${NC} 配置 AdGuard Home 使用53端口"
-        echo -e "${YELLOW}---------------------- 其他一键脚本(谨慎) --------------------${NC}"
-        echo -e " ${GREEN}14.${NC} BBR/锐速等内核优化脚本"
-        echo -e " ${GREEN}15.${NC} 另一个一键脚本 (oneclick)"
+        echo -e " ${GREEN}1.${NC}  ${MENU_OPT_1}"
+        echo -e " ${GREEN}2.${NC}  ${MENU_OPT_2}"
+        echo -e " ${GREEN}3.${NC}  ${MENU_OPT_3}"
+        echo -e " ${GREEN}4.${NC}  ${MENU_OPT_4}"
+        echo -e " ${GREEN}5.${NC}  ${MENU_OPT_5}"
+        echo -e "${YELLOW}${MENU_SECTION_SYSTEM}${NC}"
+        echo -e " ${GREEN}6.${NC}  ${MENU_OPT_6}"
+        echo -e " ${GREEN}7.${NC}  ${MENU_OPT_7}"
+        echo -e " ${GREEN}8.${NC}  ${MENU_OPT_8}"
+        echo -e "${YELLOW}${MENU_SECTION_PANEL}${NC}"
+        echo -e " ${GREEN}9.${NC}  ${MENU_OPT_9}"
+        echo -e " ${GREEN}10.${NC} ${MENU_OPT_10}"
+        echo -e " ${GREEN}11.${NC} ${MENU_OPT_11}"
+        echo -e "${YELLOW}${MENU_SECTION_NETWORK}${NC}"
+        echo -e " ${GREEN}12.${NC} ${MENU_OPT_12}"
+        echo -e " ${GREEN}13.${NC} ${MENU_OPT_13}"
+        echo -e " ${GREEN}14.${NC} ${MENU_OPT_14}"
+        echo -e " ${GREEN}15.${NC} ${MENU_OPT_15}"
+        echo -e " ${GREEN}16.${NC} ${MENU_OPT_16}"
+        echo -e "${YELLOW}${MENU_SECTION_OTHERS}${NC}"
+        echo -e " ${GREEN}17.${NC} ${MENU_OPT_17}"
+        echo -e " ${GREEN}18.${NC} ${MENU_OPT_18}"
         echo -e "${YELLOW}================================================================${NC}"
-        echo -e " ${RED}0.${NC}  退出脚本"
+        echo -e " ${RED}0.${NC}  ${MENU_OPT_0}"
         echo -e "${YELLOW}================================================================${NC}"
         
-        read -rp "请输入您的选择 [0-15]: " choice
+        read -rp "Your choice [0-18]: " choice
 
         case $choice in
             1) change_apt_source ;;
@@ -241,23 +328,25 @@ function main_menu() {
             3) install_common_tools ;;
             4) install_docker ;;
             5) install_xrdp ;;
-            6) install_1panel ;;
-            7) install_xui ;;
-            8) install_v2raya ;;
-            9) install_zerotier ;;
-            10) install_fail2ban ;;
-            11) install_chinese_support ;;
-            12) install_adguard_home ;;
-            13) configure_adguard_port53 ;;
-            14) bbr_kernel_script ;;
-            15) oneclick_script ;;
+            6) setup_ssh_key ;;
+            7) change_ssh_port ;;
+            8) set_timezone_shanghai ;;
+            9) install_1panel ;;
+            10) install_xui ;;
+            11) install_v2raya ;;
+            12) install_zerotier ;;
+            13) install_fail2ban ;;
+            14) install_chinese_support ;;
+            15) install_adguard_home ;;
+            16) configure_adguard_port53 ;;
+            17) bbr_kernel_script ;;
+            18) oneclick_script ;;
             0)
-                echo -e "\n${GREEN}感谢使用，脚本已退出。${NC}"
                 exit 0
                 ;;
             *)
-                echo -e "\n${RED}无效的输入，请输入 0 到 15 之间的数字。${NC}"
-                sleep 2
+                echo -e "\n${RED}${INVALID_INPUT} 0-18.${NC}"
+                sleep 1
                 ;;
         esac
     done
