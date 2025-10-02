@@ -3,7 +3,7 @@
 #===============================================================================================
 #   脚本: Ubuntu 初始化一键脚本
 #   作者: bai0012
-#   更新日期: 2025-08-04
+#   更新日期: 2025-10-02
 #===============================================================================================
 
 # 颜色定义
@@ -48,7 +48,7 @@ select_language
 if [ "$LANG" = "en" ]; then
     PAUSE_MSG="Task completed. Press [Enter] to return to the main menu..."
     # Menu Titles
-    MENU_TITLE="Ubuntu Quick Setup Script (v4.0)"
+    MENU_TITLE="Ubuntu/Debian Quick Setup Script (v4.2)"
     MENU_SECTION_SYSTEM="--------- System & SSH ---------"
     MENU_SECTION_PANEL="-------- Panel & Proxy ---------"
     MENU_SECTION_NETWORK="------- Network & Security -------"
@@ -56,8 +56,15 @@ if [ "$LANG" = "en" ]; then
     # Menu Options
     MENU_OPT_1="Change APT mirror to a Chinese source"
     MENU_OPT_2="Update and clean system"
-    MENU_OPT_3="Install common tools"
+    MENU_OPT_3="Install common tools & Enable auto-updates"
+    MENU_TIPS_3_1="Installing unattended-upgrades..."
+    MENU_TIPS_3_2="Enabling automatic security updates..."
+    MENU_TIPS_3_3="Unattended-upgrades enabled."
     MENU_OPT_4="Install Docker and Docker-Compose"
+    MENU_TIPS_4_1="Detected OS:"
+    MENU_TIPS_4_2="Starting Docker installation..."
+    MENU_TIPS_4_3="Unsupported OS. This script only supports automatic Docker installation on Ubuntu and Debian."
+    MENU_TIPS_4_4="Could not determine OS distribution."
     MENU_OPT_5="Install XRDP (Remote Desktop)"
     MENU_OPT_6="Install SSH server & configure public key (github.com/bai0012)"
     MENU_TIPS_6="Installing SSH Server..."
@@ -71,18 +78,23 @@ if [ "$LANG" = "en" ]; then
     MENU_OPT_8="Change timezone to Asia/Shanghai"
     MENU_TIPS_8="Changing timezone to Asia/Shanghai..."
     MENU_TIPS_8_2="Timezone updated. Current time:"
-    MENU_OPT_9="Install 1Panel"
-    MENU_OPT_10="Install X-ui"
-    MENU_OPT_11="Install V2rayA"
-    MENU_OPT_12="Install ZeroTier"
-    MENU_TIPS_12="Please enter the ZeroTier Network ID to join"
-    MENU_TIPS_12_2="Default"
-    MENU_OPT_13="Install Fail2ban"
-    MENU_OPT_14="Install Chinese language support"
-    MENU_OPT_15="Install AdGuard Home"
-    MENU_OPT_16="Configure AdGuard Home to use port 53"
-    MENU_OPT_17="kernel.sh"
-    MENU_OPT_18="oneclick.sh"
+    MENU_OPT_9="Enable Ubuntu Pro (ESM & Livepatch)"
+    MENU_TIPS_9_1="Please enter your Ubuntu Pro token"
+    MENU_TIPS_9_2="Default token (please replace)"
+    MENU_TIPS_9_3="Attaching Ubuntu Pro subscription..."
+    MENU_TIPS_9_4="Ubuntu Pro status:"
+    MENU_OPT_10="Install 1Panel"
+    MENU_OPT_11="Install X-ui"
+    MENU_OPT_12="Install V2rayA"
+    MENU_OPT_13="Install ZeroTier"
+    MENU_TIPS_13="Please enter the ZeroTier Network ID to join"
+    MENU_TIPS_13_2="Default"
+    MENU_OPT_14="Install Fail2ban"
+    MENU_OPT_15="Install Chinese language support"
+    MENU_OPT_16="Install AdGuard Home"
+    MENU_OPT_17="Configure AdGuard Home to use port 53"
+    MENU_OPT_18="kernel.sh"
+    MENU_OPT_19="oneclick.sh"
     MENU_OPT_0="Exit Script"
     # General Messages
     INVALID_INPUT="Invalid input, please enter a number between"
@@ -92,7 +104,7 @@ fi
 if [ "$LANG" = "zh" ]; then
     PAUSE_MSG="任务完成。请按 [Enter] 键返回主菜单..."
     # Menu Titles
-    MENU_TITLE="Ubuntu 初始化一键脚本 (v4.0)"
+    MENU_TITLE="Ubuntu/Debian 初始化一键脚本 (v4.2)"
     MENU_SECTION_SYSTEM="-------------------------- 系统与SSH -------------------------"
     MENU_SECTION_PANEL="------------------------- 面板与代理 -------------------------"
     MENU_SECTION_NETWORK="------------------------- 网络与安全 -------------------------"
@@ -100,8 +112,15 @@ if [ "$LANG" = "zh" ]; then
     # Menu Options
     MENU_OPT_1="一键更换系统软件源"
     MENU_OPT_2="系统更新与清理"
-    MENU_OPT_3="安装常用工具"
+    MENU_OPT_3="安装常用工具并启用自动更新"
+    MENU_TIPS_3_1="正在安装 unattended-upgrades..."
+    MENU_TIPS_3_2="正在启用自动安全更新..."
+    MENU_TIPS_3_3="unattended-upgrades 已启用。"
     MENU_OPT_4="安装 Docker 和 Docker-Compose"
+    MENU_TIPS_4_1="检测到操作系统为:"
+    MENU_TIPS_4_2="开始安装 Docker..."
+    MENU_TIPS_4_3="不支持的操作系统。此脚本仅支持在 Ubuntu 和 Debian 上自动安装 Docker。"
+    MENU_TIPS_4_4="无法确定操作系统发行版。"
     MENU_OPT_5="安装 XRDP (远程桌面)"
     MENU_OPT_6="安装SSH服务并配置公钥 (github.com/bai0012)"
     MENU_TIPS_6="正在安装 OpenSSH 服务器..."
@@ -115,21 +134,26 @@ if [ "$LANG" = "zh" ]; then
     MENU_OPT_8="修改时区为 Asia/Shanghai"
     MENU_TIPS_8="正在修改时区为 Asia/Shanghai..."
     MENU_TIPS_8_2="时区已更新。当前时间:"
-    MENU_OPT_9="安装 1Panel"
-    MENU_OPT_10="安装 X-ui"
-    MENU_OPT_11="安装 V2rayA"
-    MENU_OPT_12="安装 ZeroTier"
-    MENU_TIPS_12="请输入您要加入的 ZeroTier 网络 ID"
-    MENU_TIPS_12_2="默认"
-    MENU_OPT_13="安装 Fail2ban"
-    MENU_OPT_14="安装中文语言支持"
-    MENU_OPT_15="安装 AdGuard Home"
-    MENU_OPT_16="配置 AdGuard Home 使用53端口"
-    MENU_OPT_17="kernel.sh"
-    MENU_OPT_18="oneclick.sh"
+    MENU_OPT_9="启用 Ubuntu Pro (ESM & Livepatch)"
+    MENU_TIPS_9_1="请输入您的 Ubuntu Pro Token"
+    MENU_TIPS_9_2="默认Token(请替换)"
+    MENU_TIPS_9_3="正在附加 Ubuntu Pro 订阅..."
+    MENU_TIPS_9_4="Ubuntu Pro 状态:"
+    MENU_OPT_10="安装 1Panel"
+    MENU_OPT_11="安装 X-ui"
+    MENU_OPT_12="安装 V2rayA"
+    MENU_OPT_13="安装 ZeroTier"
+    MENU_TIPS_13="请输入您要加入的 ZeroTier 网络 ID"
+    MENU_TIPS_13_2="默认"
+    MENU_OPT_14="安装 Fail2ban"
+    MENU_OPT_15="安装中文语言支持"
+    MENU_OPT_16="安装 AdGuard Home"
+    MENU_OPT_17="配置 AdGuard Home 使用53端口"
+    MENU_OPT_18="kernel.sh"
+    MENU_OPT_19="oneclick.sh"
     MENU_OPT_0="退出脚本"
     # General Messages
-    INVALID_INPUT="无效的输入，请输入 0 到 18 之间的数字。"
+    INVALID_INPUT="无效的输入，请输入 0 到 19 之间的数字。"
 fi
 
 
@@ -150,16 +174,58 @@ function update_system() {
 }
 
 function install_common_tools() {
-    apt-get update && apt-get install curl neofetch unzip git nano net-tools tasksel screen nethogs -y
+    apt-get update
+    apt-get install curl neofetch unzip git nano net-tools tasksel screen nethogs -y
+
+    # 安装并启用 unattended-upgrades
+    echo -e "${YELLOW}${MENU_TIPS_3_1}${NC}"
+    apt-get install -y unattended-upgrades
+    
+    echo -e "${YELLOW}${MENU_TIPS_3_2}${NC}"
+    # 以非交互方式创建配置文件以启用自动更新
+    cat > /etc/apt/apt.conf.d/20auto-upgrades << EOF
+APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::Unattended-Upgrade "1";
+EOF
+    # 启用自动清理未使用的依赖项
+    sed -i 's|//Unattended-Upgrade::Remove-Unused-Dependencies "false";|Unattended-Upgrade::Remove-Unused-Dependencies "true";|' /etc/apt/apt.conf.d/50unattended-upgrades
+    echo -e "${GREEN}${MENU_TIPS_3_3}${NC}"
     pause
 }
 
 function install_docker() {
+    # 自动检测操作系统ID
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        OS_ID=$ID
+    else
+        echo -e "${RED}${MENU_TIPS_4_4}${NC}"
+        pause
+        return 1
+    fi
+
+    local docker_dist=""
+    if [ "$OS_ID" = "ubuntu" ]; then
+        docker_dist="ubuntu"
+        echo -e "${GREEN}${MENU_TIPS_4_1} Ubuntu. ${MENU_TIPS_4_2}${NC}"
+    elif [ "$OS_ID" = "debian" ]; then
+        docker_dist="debian"
+        echo -e "${GREEN}${MENU_TIPS_4_1} Debian. ${MENU_TIPS_4_2}${NC}"
+    else
+        echo -e "${RED}${MENU_TIPS_4_3}${NC}"
+        pause
+        return 1
+    fi
+    
+    # 安装 Docker
     apt-get update && apt-get install ca-certificates curl -y
     install -m 0755 -d /etc/apt/keyrings
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+    curl -fsSL "https://download.docker.com/linux/${docker_dist}/gpg" -o /etc/apt/keyrings/docker.asc
     chmod a+r /etc/apt/keyrings/docker.asc
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+    
+    # 注意: ${UBUNTU_CODENAME:-$VERSION_CODENAME} 这个表达式能同时兼容Ubuntu和Debian
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/${docker_dist} $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+    
     apt-get update
     apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
     systemctl status docker --no-pager
@@ -219,6 +285,27 @@ function set_timezone_shanghai() {
     pause
 }
 
+function enable_ubuntu_pro() {
+    # 检查 ubuntu-advantage-tools 是否已安装
+    if ! dpkg -l | grep -q "ubuntu-advantage-tools"; then
+        echo "Installing ubuntu-advantage-tools..."
+        apt-get update
+        apt-get install ubuntu-advantage-tools -y
+    fi
+
+    local default_token="xxxxxxxx"
+    read -rp "${MENU_TIPS_9_1} [${MENU_TIPS_9_2}: ${default_token}]: " pro_token
+    pro_token=${pro_token:-"${default_token}"}
+    
+    echo -e "${YELLOW}${MENU_TIPS_9_3}${NC}"
+    pro attach "${pro_token}"
+    
+    echo -e "${GREEN}${MENU_TIPS_9_4}${NC}"
+    pro status
+    pause
+}
+
+
 function install_1panel() {
     curl -sSL https://resource.fit2cloud.com/1panel/package/quick_start.sh -o quick_start.sh && bash quick_start.sh
     pause
@@ -239,7 +326,7 @@ function install_v2raya() {
 
 function install_zerotier() {
     curl -s https://install.zerotier.com | bash
-    read -rp "${MENU_TIPS_12} [${MENU_TIPS_12_2}: 5756c68f8fb92cfd]: " network_id
+    read -rp "${MENU_TIPS_13} [${MENU_TIPS_13_2}: 5756c68f8fb92cfd]: " network_id
     network_id=${network_id:-"5756c68f8fb92cfd"}
     zerotier-cli join "${network_id}"
     pause
@@ -303,24 +390,25 @@ function main_menu() {
         echo -e " ${GREEN}6.${NC}  ${MENU_OPT_6}"
         echo -e " ${GREEN}7.${NC}  ${MENU_OPT_7}"
         echo -e " ${GREEN}8.${NC}  ${MENU_OPT_8}"
-        echo -e "${YELLOW}${MENU_SECTION_PANEL}${NC}"
         echo -e " ${GREEN}9.${NC}  ${MENU_OPT_9}"
+        echo -e "${YELLOW}${MENU_SECTION_PANEL}${NC}"
         echo -e " ${GREEN}10.${NC} ${MENU_OPT_10}"
         echo -e " ${GREEN}11.${NC} ${MENU_OPT_11}"
-        echo -e "${YELLOW}${MENU_SECTION_NETWORK}${NC}"
         echo -e " ${GREEN}12.${NC} ${MENU_OPT_12}"
+        echo -e "${YELLOW}${MENU_SECTION_NETWORK}${NC}"
         echo -e " ${GREEN}13.${NC} ${MENU_OPT_13}"
         echo -e " ${GREEN}14.${NC} ${MENU_OPT_14}"
         echo -e " ${GREEN}15.${NC} ${MENU_OPT_15}"
         echo -e " ${GREEN}16.${NC} ${MENU_OPT_16}"
-        echo -e "${YELLOW}${MENU_SECTION_OTHERS}${NC}"
         echo -e " ${GREEN}17.${NC} ${MENU_OPT_17}"
+        echo -e "${YELLOW}${MENU_SECTION_OTHERS}${NC}"
         echo -e " ${GREEN}18.${NC} ${MENU_OPT_18}"
+        echo -e " ${GREEN}19.${NC} ${MENU_OPT_19}"
         echo -e "${YELLOW}================================================================${NC}"
         echo -e " ${RED}0.${NC}  ${MENU_OPT_0}"
         echo -e "${YELLOW}================================================================${NC}"
         
-        read -rp "Your choice [0-18]: " choice
+        read -rp "Your choice [0-19]: " choice
 
         case $choice in
             1) change_apt_source ;;
@@ -331,21 +419,22 @@ function main_menu() {
             6) setup_ssh_key ;;
             7) change_ssh_port ;;
             8) set_timezone_shanghai ;;
-            9) install_1panel ;;
-            10) install_xui ;;
-            11) install_v2raya ;;
-            12) install_zerotier ;;
-            13) install_fail2ban ;;
-            14) install_chinese_support ;;
-            15) install_adguard_home ;;
-            16) configure_adguard_port53 ;;
-            17) bbr_kernel_script ;;
-            18) oneclick_script ;;
+            9) enable_ubuntu_pro ;;
+            10) install_1panel ;;
+            11) install_xui ;;
+            12) install_v2raya ;;
+            13) install_zerotier ;;
+            14) install_fail2ban ;;
+            15) install_chinese_support ;;
+            16) install_adguard_home ;;
+            17) configure_adguard_port53 ;;
+            18) bbr_kernel_script ;;
+            19) oneclick_script ;;
             0)
                 exit 0
                 ;;
             *)
-                echo -e "\n${RED}${INVALID_INPUT} 0-18.${NC}"
+                echo -e "\n${RED}${INVALID_INPUT} 0-19.${NC}"
                 sleep 1
                 ;;
         esac
@@ -354,3 +443,4 @@ function main_menu() {
 
 # 脚本入口
 main_menu
+
