@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #===============================================================================================
-#   脚本: Ubuntu 初始化一键脚本
+#   脚本: Ubuntu/Debian 初始化一键脚本
 #   作者: bai0012
 #   更新日期: 2025-10-02
 #===============================================================================================
@@ -43,12 +43,21 @@ select_language() {
 # 调用语言选择函数
 select_language
 
+# 检测操作系统
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    OS_ID=$ID
+else
+    OS_ID="unknown"
+fi
+
+
 # 定义文本变量
 # --- English ---
 if [ "$LANG" = "en" ]; then
     PAUSE_MSG="Task completed. Press [Enter] to return to the main menu..."
     # Menu Titles
-    MENU_TITLE="Ubuntu/Debian Quick Setup Script (v4.2)"
+    MENU_TITLE="Ubuntu/Debian Quick Setup Script (v4.3)"
     MENU_SECTION_SYSTEM="--------- System & SSH ---------"
     MENU_SECTION_PANEL="-------- Panel & Proxy ---------"
     MENU_SECTION_NETWORK="------- Network & Security -------"
@@ -78,11 +87,12 @@ if [ "$LANG" = "en" ]; then
     MENU_OPT_8="Change timezone to Asia/Shanghai"
     MENU_TIPS_8="Changing timezone to Asia/Shanghai..."
     MENU_TIPS_8_2="Timezone updated. Current time:"
-    MENU_OPT_9="Enable Ubuntu Pro (ESM & Livepatch)"
+    MENU_OPT_9="Enable Ubuntu Pro"
     MENU_TIPS_9_1="Please enter your Ubuntu Pro token"
     MENU_TIPS_9_2="Default token (please replace)"
     MENU_TIPS_9_3="Attaching Ubuntu Pro subscription..."
     MENU_TIPS_9_4="Ubuntu Pro status:"
+    MENU_TIPS_9_5="This feature is only available on Ubuntu."
     MENU_OPT_10="Install 1Panel"
     MENU_OPT_11="Install X-ui"
     MENU_OPT_12="Install V2rayA"
@@ -93,6 +103,7 @@ if [ "$LANG" = "en" ]; then
     MENU_OPT_15="Install Chinese language support"
     MENU_OPT_16="Install AdGuard Home"
     MENU_OPT_17="Configure AdGuard Home to use port 53"
+    MENU_TIPS_17_1="systemd-resolved service is not active. Skipping configuration."
     MENU_OPT_18="kernel.sh"
     MENU_OPT_19="oneclick.sh"
     MENU_OPT_0="Exit Script"
@@ -104,7 +115,7 @@ fi
 if [ "$LANG" = "zh" ]; then
     PAUSE_MSG="任务完成。请按 [Enter] 键返回主菜单..."
     # Menu Titles
-    MENU_TITLE="Ubuntu/Debian 初始化一键脚本 (v4.2)"
+    MENU_TITLE="Ubuntu/Debian 初始化一键脚本 (v4.3)"
     MENU_SECTION_SYSTEM="-------------------------- 系统与SSH -------------------------"
     MENU_SECTION_PANEL="------------------------- 面板与代理 -------------------------"
     MENU_SECTION_NETWORK="------------------------- 网络与安全 -------------------------"
@@ -134,11 +145,12 @@ if [ "$LANG" = "zh" ]; then
     MENU_OPT_8="修改时区为 Asia/Shanghai"
     MENU_TIPS_8="正在修改时区为 Asia/Shanghai..."
     MENU_TIPS_8_2="时区已更新。当前时间:"
-    MENU_OPT_9="启用 Ubuntu Pro (ESM & Livepatch)"
+    MENU_OPT_9="启用 Ubuntu Pro"
     MENU_TIPS_9_1="请输入您的 Ubuntu Pro Token"
     MENU_TIPS_9_2="默认Token(请替换)"
     MENU_TIPS_9_3="正在附加 Ubuntu Pro 订阅..."
     MENU_TIPS_9_4="Ubuntu Pro 状态:"
+    MENU_TIPS_9_5="此功能仅在 Ubuntu 系统上可用。"
     MENU_OPT_10="安装 1Panel"
     MENU_OPT_11="安装 X-ui"
     MENU_OPT_12="安装 V2rayA"
@@ -149,6 +161,7 @@ if [ "$LANG" = "zh" ]; then
     MENU_OPT_15="安装中文语言支持"
     MENU_OPT_16="安装 AdGuard Home"
     MENU_OPT_17="配置 AdGuard Home 使用53端口"
+    MENU_TIPS_17_1="systemd-resolved 服务未运行，跳过配置。"
     MENU_OPT_18="kernel.sh"
     MENU_OPT_19="oneclick.sh"
     MENU_OPT_0="退出脚本"
@@ -194,11 +207,7 @@ EOF
 }
 
 function install_docker() {
-    # 自动检测操作系统ID
-    if [ -f /etc/os-release ]; then
-        . /etc/os-release
-        OS_ID=$ID
-    else
+    if [ "$OS_ID" = "unknown" ]; then
         echo -e "${RED}${MENU_TIPS_4_4}${NC}"
         pause
         return 1
@@ -286,6 +295,13 @@ function set_timezone_shanghai() {
 }
 
 function enable_ubuntu_pro() {
+    # 检查是否为 Ubuntu 系统
+    if [ "$OS_ID" != "ubuntu" ]; then
+        echo -e "${RED}${MENU_TIPS_9_5}${NC}"
+        pause
+        return
+    fi
+
     # 检查 ubuntu-advantage-tools 是否已安装
     if ! dpkg -l | grep -q "ubuntu-advantage-tools"; then
         echo "Installing ubuntu-advantage-tools..."
@@ -354,6 +370,13 @@ function install_adguard_home() {
 }
 
 function configure_adguard_port53() {
+    # 检查 systemd-resolved 服务是否在运行
+    if ! systemctl is-active --quiet systemd-resolved; then
+        echo -e "${YELLOW}${MENU_TIPS_17_1}${NC}"
+        pause
+        return
+    fi
+
     CONF_FILE="/etc/systemd/resolved.conf.d/adguardhome.conf"
     mkdir -p "$(dirname "${CONF_FILE}")"
     echo -e "[Resolve]\nDNS=127.0.0.1\nDNSStubListener=no" > "${CONF_FILE}"
