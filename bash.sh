@@ -57,7 +57,7 @@ fi
 if [ "$LANG" = "en" ]; then
     PAUSE_MSG="Task completed. Press [Enter] to return to the main menu..."
     # Menu Titles
-    MENU_TITLE="Ubuntu/Debian Quick Setup Script (v4.3)"
+    MENU_TITLE="Ubuntu/Debian Quick Setup Script (v4.6)"
     MENU_SECTION_SYSTEM="--------- System & SSH ---------"
     MENU_SECTION_PANEL="-------- Panel & Proxy ---------"
     MENU_SECTION_NETWORK="------- Network & Security -------"
@@ -65,7 +65,7 @@ if [ "$LANG" = "en" ]; then
     # Menu Options
     MENU_OPT_1="Change APT mirror to a Chinese source"
     MENU_OPT_2="Update and clean system"
-    MENU_OPT_3="Install common tools & Enable auto-updates"
+    MENU_OPT_3="Install common tools & Enable auto-updates/cleanup"
     MENU_TIPS_3_1="Installing unattended-upgrades..."
     MENU_TIPS_3_2="Enabling automatic security updates..."
     MENU_TIPS_3_3="Unattended-upgrades enabled."
@@ -115,7 +115,7 @@ fi
 if [ "$LANG" = "zh" ]; then
     PAUSE_MSG="任务完成。请按 [Enter] 键返回主菜单..."
     # Menu Titles
-    MENU_TITLE="Ubuntu/Debian 初始化一键脚本 (v4.3)"
+    MENU_TITLE="Ubuntu/Debian 初始化一键脚本 (v4.6)"
     MENU_SECTION_SYSTEM="-------------------------- 系统与SSH -------------------------"
     MENU_SECTION_PANEL="------------------------- 面板与代理 -------------------------"
     MENU_SECTION_NETWORK="------------------------- 网络与安全 -------------------------"
@@ -123,7 +123,7 @@ if [ "$LANG" = "zh" ]; then
     # Menu Options
     MENU_OPT_1="一键更换系统软件源"
     MENU_OPT_2="系统更新与清理"
-    MENU_OPT_3="安装常用工具并启用自动更新"
+    MENU_OPT_3="安装常用工具并启用自动更新与清理"
     MENU_TIPS_3_1="正在安装 unattended-upgrades..."
     MENU_TIPS_3_2="正在启用自动安全更新..."
     MENU_TIPS_3_3="unattended-upgrades 已启用。"
@@ -195,13 +195,15 @@ function install_common_tools() {
     apt-get install -y unattended-upgrades
     
     echo -e "${YELLOW}${MENU_TIPS_3_2}${NC}"
-    # 以非交互方式创建配置文件以启用自动更新
+    # 以非交互方式创建配置文件以启用自动更新和周期性清理
     cat > /etc/apt/apt.conf.d/20auto-upgrades << EOF
 APT::Periodic::Update-Package-Lists "1";
 APT::Periodic::Unattended-Upgrade "1";
+APT::Periodic::AutocleanInterval "1";
 EOF
-    # 启用自动清理未使用的依赖项
+    # 启用自动清理未使用的依赖项和内核
     sed -i 's|//Unattended-Upgrade::Remove-Unused-Dependencies "false";|Unattended-Upgrade::Remove-Unused-Dependencies "true";|' /etc/apt/apt.conf.d/50unattended-upgrades
+    sed -i 's|//Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";|Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";|' /etc/apt/apt.conf.d/50unattended-upgrades
     echo -e "${GREEN}${MENU_TIPS_3_3}${NC}"
     pause
 }
@@ -466,4 +468,7 @@ function main_menu() {
 
 # 脚本入口
 main_menu
+
+
+
 
